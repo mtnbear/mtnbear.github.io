@@ -1,136 +1,112 @@
-
+<!DOCTYPE html>
 <html>
+<head>
+    <title>mk.js</title>
+    <script src="src/movement.js"></script>
+    <script src="src/mk.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles/styles.css" />
+</head>
 <body>
-    <p>
-        Video Game Trivia
-        <br />
-        Asking question <span id="NumberAsked">1</span> of 10 with <span id="NumberCorrect">0</span> answers correct</p>
-    <p>
-        <span id="TriviaQuestion">???</span>
-    </p>
-    <p>
-        &nbsp;
-        <input id="RadioTrue" type="radio" value="true" name="answer" checked="checked" /> True
-        &nbsp;&nbsp;&nbsp;
-        <input id="RadioFalse" type="radio" value="false" name="answer" /> False
-    </p>
-    <p>
-        <input id="ButtonContinue" onclick="checkAnswer();" type="button" value="continue" />
-    </p>
- 
-    <script language="javascript" type="text/javascript">
-        // Array of trivia data
-        var TriviaData = new Array(10)
-        createTwoDimensionalArray(3);
- 
-        // Variables to track state of the game
-        // i.e. number questions asked, current correct total and current question
-        var questionsAsked = 0;
-        var totalCorrect = 0;
-        var currentQuestion = 0;
-        var selectionValid = false;
- 
-        // Questions
-        TriviaData[0][0] = "Donkey Kong, Pac-Man and Tempest were all released in the same year.";
-        TriviaData[1][0] = "Capcom is a Chinese company.";
-        TriviaData[2][0] = "Othello was the first arcade game released by Nintendo.";
-        TriviaData[3][0] = "The Atari 2600 video game system was first released in 1975.";
-        TriviaData[4][0] = "The Sega Saturn game system was released first in the U.S. in 1995.";
-        TriviaData[5][0] = "The legendary game Doom was released in 1993 for the PC.";
-        TriviaData[6][0] = "Dragon's Lair was the first arcade game to feature laser-disc technology.";
-        TriviaData[7][0] = "In 1990, Nintendo and Sega went to court over the rights to Tetris.";
-        TriviaData[8][0] = "In 1996 Nintendo sells its billionth cartridge worldwide.";
-        TriviaData[9][0] = "Microsoft first released the Xbox gaming system worldwide in 2001.";
-   
-        // Answers
-        TriviaData[0][1] = "true";
-        TriviaData[1][1] = "false";
-        TriviaData[2][1] = "true";
-        TriviaData[3][1] = "false";
-        TriviaData[4][1] = "false";
-        TriviaData[5][1] = "true";
-        TriviaData[6][1] = "true";
-        TriviaData[7][1] = "false";
-        TriviaData[8][1] = "true";
-        TriviaData[9][1] = "false";
- 
-        // Has question been asked
-        // -- necessary because we are asking in random order
-        TriviaData[0][2] = "no";
-        TriviaData[1][2] = "no";
-        TriviaData[2][2] = "no";
-        TriviaData[3][2] = "no";
-        TriviaData[4][2] = "no";
-        TriviaData[5][2] = "no";
-        TriviaData[6][2] = "no";
-        TriviaData[7][2] = "no";
-        TriviaData[8][2] = "no";
-        TriviaData[9][2] = "no";
- 
-        // Load up first question
-        setQuestion();
- 
-        // Sets question text and indicator so that we know the question has been displayed
-        function setQuestion() {
-            selectionValid = false; // Flag to make sure question has not been asked yet
-            while (selectionValid == false) {
-                currentQuestion = Math.floor(Math.random() * 10); // randomly select starting question
-                if (TriviaData[currentQuestion][2] == "no") {
-                    selectionValid = true;
+    <table>
+    <thead>
+        <th>
+            Arena
+        </th>
+        <th>
+            Webcam
+        </th>
+    </thead>
+    <tbody>
+        <tr>
+            <td>
+                <div id="parent">
+                    <div id="utils">
+                        <div id="player1Name" class="playerName">Sub-Zero</div>
+                        <div id="player1LifeBar" class="lifebar"><div class="life" id="player1Life"></div></div>
+                        <div id="player2Name" class="playerName">Kano</div>
+                        <div id="player2LifeBar" class="lifebar"><div class="life" id="player2Life"></div></div>
+                    </div>
+                    <div id="arena">
+                    </div>
+                    <div id="loading">
+                        <span class="loadingLabel">Loading...</span>
+                    </div>
+                </div>
+            </td>
+            <td id="webcam-parent">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <h1>Instructions</h1>
+                <p>
+                    <ul class="instructions-list">
+                        <li>For playing with gesture recognition you need Google Chrome 22+ or Firefox 19+.</li>
+                        <li>Choose proper place to position your computer. I recommend you to use white wall as background and dark clothes for best contrast.</li>
+                        <li>Stay outside the scope of the webcam. It needs to capture the background behind you at first place.</li>
+                        <li>Allow to the web page to use your webcam.</li>
+                        <li>If the webcam canvas is black then you can start playing otherwise restart and try again.</li>
+                        <li>Stay in about 2.5 meters away from your computer in the middle of the view zone.</li>
+                        <li>For walking left stay in the left side of the webcam view region and right if you want to walk right. If you want to stop just go back in the middle.</li>
+                        <li>Raise your left or right arm to punch.</li>
+                        <li>Raise your left or right leg to kick.</li>
+                        <li>Squat and your fighter will squat too.</li>
+                        <li>Squat and punch for squat low punch attack.</li>
+                        <li>Enjoy!</li>
+                    </ul>
+                </p>
+            </td>
+        </tr>
+    </tbody>
+    <div class="manual">
+    </div>
+    <script>
+        (function () {
+            function $(id) {
+                return document.getElementById(id);
+            }
+            function setLife(container, life) {
+                container.style.width = life + '%';
+            }
+            document.onkeydown = function (e) {
+                if (e.keyCode === 32) {
+                    window.location.reload();
                 }
-            }
-            document.getElementById("TriviaQuestion").innerHTML = TriviaData[currentQuestion][0];
-            TriviaData[currentQuestion][2] = "yes";
-            questionsAsked = questionsAsked + 1;
-        }
- 
-        function processAnswer(myAnswer) {
-            if (TriviaData[currentQuestion][1] == myAnswer) {
-                // answer correct
-                totalCorrect = totalCorrect + 1;
-            }
-        }
- 
-        // This function creates our two dimensional array
-        function createTwoDimensionalArray(arraySize) {
-            for (i = 0; i < TriviaData.length; ++i)
-                TriviaData[i] = new Array(arraySize);
-        }
- 
-        // This function checks the answer, updates correct total
-        // and randomly selects the next question
-        function checkAnswer() {
-            if (document.getElementById("RadioTrue").checked) {
-                processAnswer("true");
-            }
-            else {
-                processAnswer("false");
-            }
-            // get next question if not asked all yet
-            if (questionsAsked < 10) {
-                setQuestion();
-            }
-            // final question asked - disable button and show final results
-            else {
-                alert("Quiz complete! You got " + totalCorrect + " correct out of 10.");
-                document.getElementById("ButtonContinue").disabled = true;
-            }
-            // update totals
-            document.getElementById("NumberAsked").innerHTML = questionsAsked;
-            document.getElementById("NumberCorrect").innerHTML = totalCorrect;
-        }
- 
+            };
+            (function () {
+                var startGame = function () {
+                        $('loading').style.visibility = 'hidden';
+                        $('arena').style.visibility = 'visible';
+                        $('utils').style.visibility = 'visible';
+                    };
+                var options = {
+                    arena: {
+                        container: document.getElementById('arena'),
+                        arena: mk.arenas.types.THRONE_ROOM
+                    },
+                    fighters: [{ name: 'Subzero' }, { name: 'Kano' }],
+                    callbacks: {
+                        attack: function (f, o, l) {
+                            if (o.getName() === 'kano') {
+                                setLife($('player2Life'), o.getLife());
+                            } else {
+                                setLife($('player1Life'), o.getLife());
+                            }
+                        }
+                    },
+                    isHost: /^yes$/i.test(prompt('Are you going to be host?')),
+                    gameName: prompt('Enter game name:'),
+                    gameType: 'network'
+                };
+                function startNewGame() {
+                    mk.start(options).ready(function () {
+                        startGame();
+                    });
+                }
+                startNewGame();
+            }());
+        }());
     </script>
-
-<script>window.google={kEI:"Quz2S63qIYeglAfw8oHGCg",kEXPI:"17259,23663,24477,24661,24745,24770,24808",kCSI:{e:"17259,23663,24477,24661,24745,24770,24808",ei:"Quz2S63qIYeglAfw8oHGCg",expi:"17259,23663,24477,24661,24745,24770,24808"},ml:function(){},pageState:"#",kHL:"en",time:function(){return(new Date).getTime()},log:function(b,d,c){var a=new Image,e=google,g=e.lc,f=e.li;a.onerror=(a.onload=(a.onabort=function(){delete g[f]}));g[f]=a;c=c||"/gen_204?atyp=i&ct="+b+"&cad="+d+"&zx="+google.time();a.src=c;e.li=f+1},lc:[],li:0,j:{en:1,l:function(){},e:function(){},b:location.hash&&location.hash!="#",bv:3,pl:[],mc:0,sc:0.5},Toolbelt:{}};(function(){for(var d=0,c;c=["ad","bc","p","pa","zd","ac","pc","pah","ph","sa","xx","zc","zz"][d++];)(function(a){google.j[a]=function(){google.j.pl.push([a,arguments])}})(c)})();
- window.google.sn="webhp";window.google.timers={load:{t:{start:(new Date).getTime()}}};try{window.google.pt=window.gtbExternal&&window.gtbExternal.pageT();}catch(u){}window.google.jsrt_kill=1;
- </script>
- <style>
- </style>
 </body>
 </html>
-
-
-
-
- 
