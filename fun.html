@@ -1,137 +1,127 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<style>
-canvas {
-    border:1px solid #d3d3d3;
-    background-color: #f1f1f1;
-}
-</style>
-</head>
-<body onload="startGame()">
-<script>
 
-var myGamePiece;
-var myObstacles = [];
-var myScore;
-
-function startGame() {
-    myGamePiece = new component(30, 30, "red", 10, 120);
-    myGamePiece.gravity = 0.05;
-    myScore = new component("30px", "Consolas", "black", 280, 40, "text");
-    myGameArea.start();
-}
-
-var myGameArea = {
-    canvas : document.createElement("canvas"),
-    start : function() {
-        this.canvas.width = 480;
-        this.canvas.height = 270;
-        this.context = this.canvas.getContext("2d");
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-        this.frameNo = 0;
-        this.interval = setInterval(updateGameArea, 20);
-        },
-    clear : function() {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-}
-
-function component(width, height, color, x, y, type) {
-    this.type = type;
-    this.score = 0;
-    this.width = width;
-    this.height = height;
-    this.speedX = 0;
-    this.speedY = 0;
-    this.x = x;
-    this.y = y;
-    this.gravity = 0;
-    this.gravitySpeed = 0;
-    this.update = function() {
-        ctx = myGameArea.context;
-        if (this.type == "text") {
-            ctx.font = this.width + " " + this.height;
-            ctx.fillStyle = color;
-            ctx.fillText(this.text, this.x, this.y);
-        } else {
-            ctx.fillStyle = color;
-            ctx.fillRect(this.x, this.y, this.width, this.height);
+Advertisement
+    <p>
+        Video Game Trivia
+        <br />
+        Asking question <span id="NumberAsked">1</span> of 10 with <span id="NumberCorrect">0</span> answers correct</p>
+    <p>
+        <span id="TriviaQuestion">???</span>
+    </p>
+    <p>
+        &nbsp;
+        <input id="RadioTrue" type="radio" value="true" name="answer" checked="checked" /> True
+        &nbsp;&nbsp;&nbsp;
+        <input id="RadioFalse" type="radio" value="false" name="answer" /> False
+    </p>
+    <p>
+        <input id="ButtonContinue" onclick="checkAnswer();" type="button" value="continue" />
+    </p>
+ 
+    <script language="javascript" type="text/javascript">
+        // Array of trivia data
+        var TriviaData = new Array(10)
+        createTwoDimensionalArray(3);
+ 
+        // Variables to track state of the game
+        // i.e. number questions asked, current correct total and current question
+        var questionsAsked = 0;
+        var totalCorrect = 0;
+        var currentQuestion = 0;
+        var selectionValid = false;
+ 
+        // Questions
+        TriviaData[0][0] = "Donkey Kong, Pac-Man and Tempest were all released in the same year.";
+        TriviaData[1][0] = "Capcom is a Chinese company.";
+        TriviaData[2][0] = "Othello was the first arcade game released by Nintendo.";
+        TriviaData[3][0] = "The Atari 2600 video game system was first released in 1975.";
+        TriviaData[4][0] = "The Sega Saturn game system was released first in the U.S. in 1995.";
+        TriviaData[5][0] = "The legendary game Doom was released in 1993 for the PC.";
+        TriviaData[6][0] = "Dragon's Lair was the first arcade game to feature laser-disc technology.";
+        TriviaData[7][0] = "In 1990, Nintendo and Sega went to court over the rights to Tetris.";
+        TriviaData[8][0] = "In 1996 Nintendo sells its billionth cartridge worldwide.";
+        TriviaData[9][0] = "Microsoft first released the Xbox gaming system worldwide in 2001.";
+   
+        // Answers
+        TriviaData[0][1] = "true";
+        TriviaData[1][1] = "false";
+        TriviaData[2][1] = "true";
+        TriviaData[3][1] = "false";
+        TriviaData[4][1] = "false";
+        TriviaData[5][1] = "true";
+        TriviaData[6][1] = "true";
+        TriviaData[7][1] = "false";
+        TriviaData[8][1] = "true";
+        TriviaData[9][1] = "false";
+ 
+        // Has question been asked
+        // -- necessary because we are asking in random order
+        TriviaData[0][2] = "no";
+        TriviaData[1][2] = "no";
+        TriviaData[2][2] = "no";
+        TriviaData[3][2] = "no";
+        TriviaData[4][2] = "no";
+        TriviaData[5][2] = "no";
+        TriviaData[6][2] = "no";
+        TriviaData[7][2] = "no";
+        TriviaData[8][2] = "no";
+        TriviaData[9][2] = "no";
+ 
+        // Load up first question
+        setQuestion();
+ 
+        // Sets question text and indicator so that we know the question has been displayed
+        function setQuestion() {
+            selectionValid = false; // Flag to make sure question has not been asked yet
+            while (selectionValid == false) {
+                currentQuestion = Math.floor(Math.random() * 10); // randomly select starting question
+                if (TriviaData[currentQuestion][2] == "no") {
+                    selectionValid = true;
+                }
+            }
+            document.getElementById("TriviaQuestion").innerHTML = TriviaData[currentQuestion][0];
+            TriviaData[currentQuestion][2] = "yes";
+            questionsAsked = questionsAsked + 1;
         }
-    }
-    this.newPos = function() {
-        this.gravitySpeed += this.gravity;
-        this.x += this.speedX;
-        this.y += this.speedY + this.gravitySpeed;
-        this.hitBottom();
-    }
-    this.hitBottom = function() {
-        var rockbottom = myGameArea.canvas.height - this.height;
-        if (this.y > rockbottom) {
-            this.y = rockbottom;
-            this.gravitySpeed = 0;
+ 
+        function processAnswer(myAnswer) {
+            if (TriviaData[currentQuestion][1] == myAnswer) {
+                // answer correct
+                totalCorrect = totalCorrect + 1;
+            }
         }
-    }
-    this.crashWith = function(otherobj) {
-        var myleft = this.x;
-        var myright = this.x + (this.width);
-        var mytop = this.y;
-        var mybottom = this.y + (this.height);
-        var otherleft = otherobj.x;
-        var otherright = otherobj.x + (otherobj.width);
-        var othertop = otherobj.y;
-        var otherbottom = otherobj.y + (otherobj.height);
-        var crash = true;
-        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
-            crash = false;
+ 
+        // This function creates our two dimensional array
+        function createTwoDimensionalArray(arraySize) {
+            for (i = 0; i < TriviaData.length; ++i)
+                TriviaData[i] = new Array(arraySize);
         }
-        return crash;
-    }
-}
-
-function updateGameArea() {
-    var x, height, gap, minHeight, maxHeight, minGap, maxGap;
-    for (i = 0; i < myObstacles.length; i += 1) {
-        if (myGamePiece.crashWith(myObstacles[i])) {
-            return;
+ 
+        // This function checks the answer, updates correct total
+        // and randomly selects the next question
+        function checkAnswer() {
+            if (document.getElementById("RadioTrue").checked) {
+                processAnswer("true");
+            }
+            else {
+                processAnswer("false");
+            }
+            // get next question if not asked all yet
+            if (questionsAsked < 10) {
+                setQuestion();
+            }
+            // final question asked - disable button and show final results
+            else {
+                alert("Quiz complete! You got " + totalCorrect + " correct out of 10.");
+                document.getElementById("ButtonContinue").disabled = true;
+            }
+            // update totals
+            document.getElementById("NumberAsked").innerHTML = questionsAsked;
+            document.getElementById("NumberCorrect").innerHTML = totalCorrect;
         }
-    }
-    myGameArea.clear();
-    myGameArea.frameNo += 1;
-    if (myGameArea.frameNo == 1 || everyinterval(150)) {
-        x = myGameArea.canvas.width;
-        minHeight = 20;
-        maxHeight = 200;
-        height = Math.floor(Math.random()*(maxHeight-minHeight+1)+minHeight);
-        minGap = 50;
-        maxGap = 200;
-        gap = Math.floor(Math.random()*(maxGap-minGap+1)+minGap);
-        myObstacles.push(new component(10, height, "green", x, 0));
-        myObstacles.push(new component(10, x - height - gap, "green", x, height + gap));
-    }
-    for (i = 0; i < myObstacles.length; i += 1) {
-        myObstacles[i].x += -1;
-        myObstacles[i].update();
-    }
-    myScore.text="SCORE: " + myGameArea.frameNo;
-    myScore.update();
-    myGamePiece.newPos();
-    myGamePiece.update();
-}
+ 
+    </script>
 
-function everyinterval(n) {
-    if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
-    return false;
-}
 
-function accelerate(5) {
-    myGamePiece.gravity = 5;
-}
-</script>
-<br>
-<button onmousedown="accelerate(-0.2)" onmouseup="accelerate(0.05)">ACCELERATE</button>
-<p>Use the ACCELERATE button to stay in the air</p>
-<p>How long can you stay alive?</p>
-</body>
-</html>
+
+
+ 
