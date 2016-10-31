@@ -20,7 +20,7 @@ body {
 	background: #111;
 	text-align: center;
 	
-	&:before {
+	:before {
 		color: #eee;
 		font: 2.5em/ 2 satisfy, cursive;
 		content: 'drag me!'
@@ -41,7 +41,7 @@ div {
 .cube {
 	animation: a $t cubic-bezier(.65, .05, .35, 1) infinite alternate;
 	
-	.drag & { animation-play-state: paused; }
+	.drag  { animation-play-state: paused; }
 	
 	@for $i0 from 0 to $nc {
 		$j0: $i0 - $m;
@@ -67,7 +67,7 @@ div {
 				// current cube index
 				$idx: $i0*pow($nc, 2) + $i1*$nc + $i2 + 1;
 				
-				&:nth-child(#{$idx}) {
+				:nth-child(#{$idx}) {
 					transform: translate3d($xi, $yi, $zi);
 					color: rgb($r, $g, $b);
 					animation-name: a#{$idx};
@@ -81,7 +81,7 @@ div {
 		}
 	}
 	
-	&__face {
+	__face {
 		box-sizing: border-box;
 		margin: -.5*$l;
 		border: solid 1px #ccc;
@@ -90,7 +90,7 @@ div {
 		background: currentcolor;
 		
 		@for $i from 0 to $nf {
-			&:nth-child(#{$i + 1}) {
+			:nth-child(#{$i + 1}) {
 				transform: 
 					if($i < $n4gon, rotateY($i*$ba4gon), 
 						rotateX(pow(-1, $i)*$ba4gon)) 
